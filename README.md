@@ -93,7 +93,7 @@ Initializes all board parameters from a given (properly formatted) configuration
 Saves the current board configuration to a config file with name `filename`. Creates the file if it does not already exist.
 
 ### Modifying Channel Parameters
-Each of the 36 OSC1 channels has 3 parameters. The first parameter `pipe_wf` is a boolean flag that is currently unused, but will be used in future versions to allow the user to send in a custom waveform. The second parameter `trig_select` is a boolean flag representing the trigger mode of the channel. The third parameter `fpga_wf` is the integer ID of the predefined waveform to use on the channel. 
+Each of the 36 OSC1 channels has 3 parameters. The first parameter `pipe_wf` is a boolean flag that is currently unused, but will be used in future versions to allow the user to send in a custom waveform. The second parameter `trig_select` is a boolean flag representing the trigger mode of the channel. The third parameter `fpga_wf` is the integer ID of the predefined waveform to use on the channel. Note that both channels and headstages are 1 indexed since the implementation is Matlab.
 
 #### `UpdateChannelTriggerType(this, headstage, chan, trig)`
 Updates the `chan` channel on the `headstage` headstage to have `trig` bit set as the trigger selector for the channel. `trig` must be a boolean flag of 1 or 0. If `trig` is 1, then the channel will be set to use the external trigger. If `trig` is 0, then the channel will be set to use the internal PC trigger (i.e. a call to `TriggerChannel(this, headstage, chan)`). Returns -1 and prints on error.
@@ -103,18 +103,35 @@ Updates the `chan` channel on the `headstage` headstage to have `pipe_wf` bit se
 
 #### `UpdateChannelWaveform(this, headstage, chan, wf)`
 Updates the `chan` channel on the `headstage` headstage to use the generated waveform defined by the integer identifier `wf`. Since there are four possible generated waveforms, `wf` must be a valid identifier in range [1,4]. Returns -1 and prints on error.
-#### Then do individual updates
+
+#### `UpdateChannelParams(this, headstage, chan, pipe_wf, trig_select, fpga_wf)`
+Performs all updates listed above. Prints on error.
 
 ### Modifying Waveform Parameters
-Description of parameters
+The software library allows for 4 possible generated waveforms. Each of these waveforms is described by the following four parameters:
+`num_pulses` - the number of pulses sent on a trigger (valid range 0-63)
+`amplitude` - current amplitude in uA (valid range 0-1023)
+`pulse_width` - width of a pulse in ms (valid range 0-637.5 in steps of 2.5 ms)
+`period` - period of a pulse in ms (valid range 0-1275 in steps of 5 ms) 
 
-#### UpdateWaveformParams()
+Note that the duty cycle of a generated wave is `pulse_width / period`. Note that the waveforms are 1 indexed since the implementation is in Matlab.
 
-#### Then do individual updates
+#### `UpdateWaveformPulses(this, wf_num, num_pulses)`
+Updates the waveform identified by `wf_num` to send `num_pulses` pulses on a trigger.
 
-### Setting/Saving Parameters with Config Files
-#### Init
-#### Save
+#### `UpdateWaveformAmplitude(this, wf_num, amp)`
+Updates the waveform identified by `wf_num` to have amplitude `amp` in uA.
+
+#### `UpdateWaveformPulseWidth(this, wf_num, pw)`
+Updates the waveform identified by `wf_num` to have a pulse width of `pw` in ms. Note that `pw` must be a multiple of 2.5.
+
+#### `UpdateWaveformPeriod(this, wf_num, period)`
+Updates the waveform identified by `wf_num` to have a period of `period` in ms. Note that `period` must be a multiple of 5.
+
+#### `UpdateWaveformParams(this, wf_num, num_pulses, amp, pw, period)`
+Updates the waveform identified by `wf_num` to have the given parameters (see above functions).
+
+
 
 ### Setting trigger types
 
