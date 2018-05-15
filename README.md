@@ -15,7 +15,8 @@ The OSC136H class is an object that represents the state of the OSC136H stimulat
 
 ### Example Usage
 ```
-osc = OSC136H() osc.GetBoardSerials()
+osc = OSC136H()
+osc.GetBoardSerials()
 osc.Connect(<serial>)
 osc.Configure('config.bit')
 ```
