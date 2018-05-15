@@ -11,19 +11,20 @@ To use the OSC136H library requires the installation of Opal Kelly FrontPanel, M
 ### Installing MinGW for Matlab
 
 ## OSC136H Library
-The OSC136H class is an object that represents the state of the OSC136H stimulation system. It maintains all the information describing the state of the system, and allows the user to modify this state. One can use this class to trigger LEDS and update waveform information.
+The OSC136H class is an object that represents the state of the OSC136H stimulation system. It maintains all the information describing the state of the system, and allows the user to modify this state. One can use this class to trigger LEDS and update waveform information. For parameter information, please see the parameter subsection.
 
 ### Example Usage
 ```
-osc = OSC136H();
-osc.Connect(<serial>);
-osc.Configure('config.bit');
-osc.InitBoardFromConfigFile('config.txt');
-osc.UpdateWaveformParams(2, 10, 10, 50, 100);
-osc.UpdateChannelParams(1, 1, 0, 0, 1);
-osc.UpdateChannelParams(1, 2, 0, 1, 2);
-osc.TriggerChannel(1, 1);
-osc.ToggleContinuous(3, 1, 1);
+osc = OSC136H(); % Constructs OSC136H object
+osc.Connect(<serial>); % Connects to board with serial number <serial>
+osc.Configure('config.bit'); % Configures board with proper bitfile
+osc.InitBoardFromConfigFile('config.txt'); % Initializes board parameters
+osc.UpdateWaveformParams(2, 10, 10, 50, 100); % Updates waveform 2 parameters with 10 pulses @ 10 uA, 50 ms pulse width, 100 ms period
+osc.UpdateChannelParams(1, 1, 0, 0, 1); % Updates headstage 1 channel 1 parameters
+osc.UpdateChannelParams(1, 2, 0, 1, 2); % Updates headstage 1 channel 2 parameters
+osc.TriggerChannel(1, 1); % triggers headstage 1, channel 1
+osc.ToggleContinuous(3, 1, 1); % turns on continuous wave on headstage 3 channel 1
+osc.OutputBoardState(); % outputs all current board parameters
 ```
 ### OSC Setup
 The OSC136H class has several methods which are used to configure the system. If there are multiple Opal Kelly devices connected to your PC, you will need the serial number of the OSC136H to properly connect to the system.
@@ -85,16 +86,17 @@ The OSC136H system parameters can be initialized by properly formatted configura
 10 10 5 10
 ```
 
-#### InitBoardFromConfigFile(this, filename)
+#### `InitBoardFromConfigFile(this, filename)`
 Initializes all board parameters from a given (properly formatted) configuration file. `filename` is a string argument referring to the name of the config file to load. Prints and returns on file opening error.
 
 #### SaveBoardToConfigFile(this, filename)
 Saves the current board configuration to a config file with name `filename`. Creates the file if it does not already exist.
 
 ### Modifying Channel Parameters
-Description of parameters
+Each of the 36 OSC1 channels has 3 parameters. The first parameter `pipe_wf` is a boolean flag that is currently unused, but will be used in future versions to allow the user to send in a custom waveform. The second parameter `trig_select` is a boolean flag representing the trigger mode of the channel. The third parameter `fpga_wf` is the integer ID of the predefined waveform to use on the channel. 
 
-#### UpdateChannelParams()
+#### UpdateChannelTriggerType(this, headstage, chan, trig)
+This function updates the `chan` channel 
 
 #### Then do individual updates
 
