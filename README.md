@@ -25,24 +25,37 @@ osc.UpdateChannelParams(1, 2, 0, 1, 2);
 osc.TriggerChannel(1, 1);
 osc.ToggleContinuous(3, 1, 1);
 ```
-### OSC Configuration
+### OSC Setup
 The OSC136H class has several methods which are used to configure the system. If there are multiple Opal Kelly devices connected to your PC, you will need the serial number of the OSC136H to properly connect to the system.
 
 #### GetBoardSerials(this)
 Returns a list of all available Opal Kelly device serial numbers.
 
 #### Connect(this, serial)
-Connects OSC136H object to an OSC136H system. `serial` is a string argument that is the serial number of the OSC136H Opal Kelly. If `serial` is an empty string, will connect to the first available Opal Kelly board. Prints and returns -1 on error.
+Connects OSC136H object to an OSC136H system. `serial` is a string argument that is the serial number of the OSC136H Opal Kelly. If `serial` is an empty string, will connect to the first available Opal Kelly board. Performs a system reset on initializing connection. Prints and returns -1 on error.
 
 #### Disconnect(this)
 Disconnects an OSC136H object. If there is a disconnect failure, or there is no Opal Kelly connected, returns -1 and prints an error message. 
 
 #### Configure(this, filename)
-Configures the internal FPGA with a bitfile specified by the string `filename`. Prints on error. This function must be called with the configuration bitfile before using the system to ensure the system is properly initialized.
+Configures the internal FPGA with a bitfile specified by the string `filename`, as well as setting the Opal Kelly PLL clock. Prints on error. This function must be called with the configuration bitfile before using the system to ensure the system is properly initialized.
 
 ### Configuration Files
-The OSC136H system parameters can be initialized by properly formatted configuration files. An example of a properly formatted configuration file is given below:
+The OSC136H system parameters can be initialized by properly formatted configuration files. An example of a properly formatted configuration file is given below. Note that the comments provided are only for explanation, and a proper config file cannot have any comments. The system can be initialized by config files, and can also save current configurations to a config file. 
 ```
+0 0 1 # Headstage 1, Channel 1 parameters <pipe_wf> <trigger_type> <waveform_select>
+0 0 1 # Headstage 1, Channel 2...
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1 # Headstage 2, Channel 1...
 0 0 1
 0 0 1
 0 0 1
@@ -54,6 +67,7 @@ The OSC136H system parameters can be initialized by properly formatted configura
 0 0 1
 0 0 1
 0 0 1
+0 0 1 # Headstage 3, Channel 1...
 0 0 1
 0 0 1
 0 0 1
@@ -65,25 +79,18 @@ The OSC136H system parameters can be initialized by properly formatted configura
 0 0 1
 0 0 1
 0 0 1
-0 0 1
-0 0 1
-0 0 1
-0 0 1
-0 0 1
-0 0 1
-0 0 1
-0 0 1
-0 1 2
-0 1 2
-0 1 2
-0 1 2
-0 1 2
-0 1 2
+10 10 5 10 # Waveform 1 parameters <num_pulses> <amplitude (uA)> <pulse width (ms)> <period (ms)>
+10 10 5 10 # Waveform 2 parameters...
 10 10 5 10
-8 8 5 5
-6 6 10 20
-4 4 7.5 15
+10 10 5 10
 ```
+
+#### InitBoardFromConfigFile(this, filename)
+Initializes all board parameters from a given (properly formatted) configuration file. `filename` is a string argument referring to the name of the config file to load. Prints and returns on file opening error.
+
+#### SaveBoardToConfigFile(this, filename)
+Saves the current board configuration to a config file with name `filename`. Creates the file if it does not already exist.
+
 ### Modifying Channel Parameters
 Description of parameters
 
