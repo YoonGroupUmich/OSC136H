@@ -14,8 +14,7 @@ To use the OSC136H library requires the installation of Opal Kelly FrontPanel, M
 The OSC136H class is an object that represents the state of the OSC136H stimulation system. It maintains all the information describing the state of the system, and allows the user to modify this state. One can use this class to trigger LEDS and update waveform information.
 
 ### Example Usage
-`osc = OSC136H()
-osc.GetBoardSerials()
+`osc = OSC136H() \nosc.GetBoardSerials()
 osc.Connect(<serial>)
 osc.Configure('config.bit')
 `
