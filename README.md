@@ -16,15 +16,19 @@ The OSC136H class is an object that represents the state of the OSC136H stimulat
 ### Example Usage
 ```
 osc = OSC136H()
-osc.GetBoardSerials()
 osc.Connect(<serial>)
 osc.Configure('config.bit')
+
 ```
 ### OSC Configuration
 
 ### Modifying Channel Parameters
 
 ### Modifying Waveform Parameters
+
+### Config Files
+
+### Setting/Saving Parameters to Config Files
 
 ### Setting trigger types
 
