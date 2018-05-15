@@ -131,11 +131,18 @@ Updates the waveform identified by `wf_num` to have a period of `period` in ms. 
 #### `UpdateWaveformParams(this, wf_num, num_pulses, amp, pw, period)`
 Updates the waveform identified by `wf_num` to have the given parameters (see above functions).
 
+### Trigger Types/Continuous Stimulation
+The system supports both internal (from-PC) and external (any external source) triggers for channels. The type of trigger used by a channel can be changed by calling `UpdateChannelTriggerType`, documented earlier. There are two methods defined in the library to trigger channels, both defined below.
 
+#### `TriggerChannel(this, headstage, chan)`
+Sends an internal trigger to the `chan` channel on the `headstage` headstage. 
 
-### Setting trigger types
-
-### Triggering Channels/Continuous Stimulation
+#### `ToggleContinuous(this, headstage, chan, toggle)`
+Toggles continuous waveform output on the `chan` channel on the `headstage` headstage. If `toggle` is set to 1, then the channel will be continuously streaming. If `toggle` is set to 0, then the channel will be turned off. 
 
 ### Outputting Board State
+
+#### `OutputBoardState(this)`
+Outputs all board parameters in readable text format.
+
 ## OSC136H GUI
