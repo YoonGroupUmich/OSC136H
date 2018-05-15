@@ -26,14 +26,64 @@ osc.TriggerChannel(1, 1);
 osc.ToggleContinuous(3, 1, 1);
 ```
 ### OSC Configuration
-The OSC136H class has several methods which are used to configure the system.
+The OSC136H class has several methods which are used to configure the system. If there are multiple Opal Kelly devices connected to your PC, you will need the serial number of the OSC136H to properly connect to the system.
+
+#### GetBoardSerials(this)
+Returns a list of all available Opal Kelly device serial numbers.
 
 #### Connect(this, serial)
+Connects OSC136H object to an OSC136H system. `serial` is a string argument that is the serial number of the OSC136H Opal Kelly. If `serial` is an empty string, will connect to the first available Opal Kelly board. Prints and returns -1 on error.
 
-#### Disconnect(this, serial)
+#### Disconnect(this)
+Disconnects an OSC136H object. If there is a disconnect failure, or there is no Opal Kelly connected, returns -1 and prints an error message. 
 
-#### Configure
+#### Configure(this, filename)
+Configures the internal FPGA with a bitfile specified by the string `filename`. Prints on error. This function must be called with the configuration bitfile before using the system to ensure the system is properly initialized.
 
+### Configuration Files
+The OSC136H system parameters can be initialized by properly formatted configuration files. An example of a properly formatted configuration file is given below:
+```
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 0 1
+0 1 2
+0 1 2
+0 1 2
+0 1 2
+0 1 2
+0 1 2
+10 10 5 10
+8 8 5 5
+6 6 10 20
+4 4 7.5 15
+```
 ### Modifying Channel Parameters
 Description of parameters
 
@@ -48,8 +98,6 @@ Description of parameters
 
 #### Then do individual updates
 
-### Config Files
-Describe config files
 ### Setting/Saving Parameters with Config Files
 #### Init
 #### Save
