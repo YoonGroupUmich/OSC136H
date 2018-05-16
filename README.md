@@ -27,7 +27,7 @@ osc.ToggleContinuous(3, 1, 1); % turns on continuous wave on headstage 3 channel
 osc.OutputBoardState(); % outputs all current board parameters
 ```
 ### OSC Setup
-The OSC136H class has several methods which are used to configure the system. If there are multiple Opal Kelly devices connected to your PC, you will need the serial number of the OSC136H to properly connect to the system.
+The OSC136H class has several methods which are used to configure the system. If there are multiple Opal Kelly devices connected to your PC, you will need the serial number of the OSC136H to properly connect to the system. You will also need the serial number of your OSC136H Opal Kelly, if there are multiple Opal Kelly boards connected (for instance, an Intan Recording System).
 
 #### `GetBoardSerials(this)`
 Returns a list of all available Opal Kelly device serial numbers.
