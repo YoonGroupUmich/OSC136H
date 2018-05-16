@@ -2,13 +2,15 @@
 Matlab GUI and library for interacting with University of Michigan's OSC136H stimulation system.
 
 ## Installation
-To use the OSC136H library requires the installation of Opal Kelly FrontPanel, Matlab 2017b (or newer), and the MinGW compiler for Matlab.
+To use the OSC136H library requires the installation of Opal Kelly FrontPanel, Matlab 2015b (or newer), and the MinGW compiler for Matlab.
 
 ### Installing Opal Kelly Frontpanel
-
-### Installing Matlab
+Use the included driver to install Opal Kelly Frontpanel on your PC. 
 
 ### Installing MinGW for Matlab
+MinGW is available for all Matlab versions 2015b and newer, but requires a workaround for any version 2017a and previous. The work around is described in the Bug Report in the following link. 
+
+https://www.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c++-compiler
 
 ## OSC136H Library
 The OSC136H class is an object that represents the state of the OSC136H stimulation system. It maintains all the information describing the state of the system, and allows the user to modify this state. One can use this class to trigger LEDS and update waveform information. For parameter information, please see the parameter subsection.
