@@ -45,6 +45,9 @@ Configures the internal FPGA with a bitfile specified by the string `filename`, 
 
 ### Configuration Files
 The OSC136H system parameters can be initialized by properly formatted configuration files. An example of a properly formatted configuration file is given below. Note that the comments provided are only for explanation, and a proper config file cannot have any comments. The system can be initialized by config files, and can also save current configurations to a config file. 
+
+NOTE: The <pipe_wf> parameter is necessary in config files but is not included in any other functions in this implementation. 
+
 ```
 0 0 1 # Headstage 1, Channel 1 parameters <pipe_wf> <trigger_type> <waveform_select>
 0 0 1 # Headstage 1, Channel 2...
