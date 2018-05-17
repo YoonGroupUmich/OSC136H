@@ -22,8 +22,8 @@ osc.Connect(<serial>); % Connects to board with serial number <serial>
 osc.Configure('config.bit'); % Configures board with proper bitfile
 osc.InitBoardFromConfigFile('config.txt'); % Initializes board parameters
 osc.UpdateWaveformParams(2, 10, 10, 50, 100); % Updates waveform 2 parameters with 10 pulses @ 10 uA, 50 ms pulse width, 100 ms period
-osc.UpdateChannelParams(1, 1, 0, 0, 1); % Updates headstage 1 channel 1 parameters
-osc.UpdateChannelParams(1, 2, 0, 1, 2); % Updates headstage 1 channel 2 parameters
+osc.UpdateChannelParams(1, 1, 0, 1); % Updates headstage 1 channel 1 parameters
+osc.UpdateChannelParams(1, 2, 1, 2); % Updates headstage 1 channel 2 parameters
 osc.TriggerChannel(1, 1); % triggers headstage 1, channel 1
 osc.ToggleContinuous(3, 1, 1); % turns on continuous wave on headstage 3 channel 1
 osc.OutputBoardState(); % outputs all current board parameters
