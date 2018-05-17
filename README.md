@@ -2,7 +2,7 @@
 Matlab GUI and library for interacting with University of Michigan's OSC136H stimulation system.
 
 ## Installation
-To use the OSC136H library requires the installation of Opal Kelly FrontPanel, Matlab 2015b (or newer), and the MinGW compiler for Matlab.
+To use the OSC136H library requires the installation of Opal Kelly FrontPanel, Matlab 2015b (or newer), and the MinGW compiler for Matlab. The OSC136H library is currently only compatible with Windows 64-bit.
 
 ### Installing Opal Kelly Frontpanel
 Use the included driver to install Opal Kelly Frontpanel on your PC. 
