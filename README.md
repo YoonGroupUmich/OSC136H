@@ -95,18 +95,15 @@ Initializes all board parameters from a given (properly formatted) configuration
 Saves the current board configuration to a config file with name `filename`. Creates the file if it does not already exist.
 
 ### Modifying Channel Parameters
-Each of the 36 OSC1 channels has 3 parameters. The first parameter `pipe_wf` is a boolean flag that is currently unused, but will be used in future versions to allow the user to send in a custom waveform. The second parameter `trig_select` is a boolean flag representing the trigger mode of the channel. The third parameter `fpga_wf` is the integer ID of the predefined waveform to use on the channel. Note that both channels and headstages are 1 indexed since the implementation is Matlab.
+Each of the 36 OSC1 channels has 2 parameters. The first parameter `trig_select` is a boolean flag representing the trigger mode of the channel. The second parameter `fpga_wf` is the integer ID of the predefined waveform to use on the channel. Note that both channels and headstages are 1 indexed since the implementation is Matlab.
 
 #### `UpdateChannelTriggerType(this, headstage, chan, trig)`
 Updates the `chan` channel on the `headstage` headstage to have `trig` bit set as the trigger selector for the channel. `trig` must be a boolean flag of 1 or 0. If `trig` is 1, then the channel will be set to use the external trigger. If `trig` is 0, then the channel will be set to use the internal PC trigger (i.e. a call to `TriggerChannel(this, headstage, chan)`). Returns -1 and prints on error.
 
-#### `UpdateChannelPipeWf(this, headstage, chan, pipe_wf)`
-Updates the `chan` channel on the `headstage` headstage to have `pipe_wf` bit set as the pipe waveform selector for this channel. If `pipe_wf` is zero, the channel will use a generated waveform, and if `pipe_wf` is 1, the channel will use a waveform uploaded to the board by the user (NOT CURRENTLY IMPLEMENTED- keep `pipe_wf` 0). Returns -1 and prints on error.
-
 #### `UpdateChannelWaveform(this, headstage, chan, wf)`
 Updates the `chan` channel on the `headstage` headstage to use the generated waveform defined by the integer identifier `wf`. Since there are four possible generated waveforms, `wf` must be a valid identifier in range [1,4]. Returns -1 and prints on error.
 
-#### `UpdateChannelParams(this, headstage, chan, pipe_wf, trig_select, fpga_wf)`
+#### `UpdateChannelParams(this, headstage, chan, trig_select, fpga_wf)`
 Performs all updates listed above. Prints on error.
 
 ### Modifying Waveform Parameters
