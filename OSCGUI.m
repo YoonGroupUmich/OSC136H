@@ -1,4 +1,8 @@
 classdef OSCGUI < handle
+    %   OSC136H Stimulation System
+    %   Controller class for the OSC136H Stimulation System.
+    %   Phil Dakin, 2018 @University of Michigan
+    %   Haojie Ye, 2018 @University of Michigan
     
     properties        
       os
@@ -13,6 +17,14 @@ classdef OSCGUI < handle
       WF_period_selectors
       WF_amp_selectors
       WF_pw_selectors
+      
+      toggle_button
+      push_button
+      
+      load_parameter_button
+      save_parameter_button
+      reset
+      
     end
     
     methods
@@ -35,6 +47,16 @@ classdef OSCGUI < handle
             obj.CreateHeadstagePanels();
             obj.CreateWaveformPanels();
             obj.f.Visible = 'on';
+            set(obj.f,'CloseRequestFcn',@(h,e)obj.CloseRequestCallback);
+        end
+        
+        function delete(this)
+             this.os.delete();
+        end
+         
+        function CloseRequestCallback(hObject,eventdata)
+             hObject.f.Visible = 'off';
+             hObject.delete();
         end
         
         function CreateHeadstagePanels(this)
@@ -50,14 +72,14 @@ classdef OSCGUI < handle
                 uicontrol('Style', 'text', 'String', strcat('Shank ', num2str(ceil(chan / 3)), ' LED ', num2str(mod(chan - 1, 3) + 1)), 'Units', 'normalized', 'Parent',... 
                             parent, 'Position', [.0 .90 - (chan - 1) * (1/13) .1 1/13], 'Background', 'white');
                 this.Channel_WF_selectors(hs, chan) = uicontrol('Style', 'popupmenu', 'String', {'Waveform 1', 'Waveform 2', 'Waveform 3', 'Waveform 4'}, 'Units', 'normalized', 'Parent',... 
-                            parent, 'Position', [.1 .90 - (chan - 1) * (1/13) .2 1/13], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.WFSelectorCB);
+                            parent, 'Position', [.1 .90 - (chan - 1) * (1/13) .2 1/13], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.WFSelectorCB,'Enable','off');
                 this.Channel_Trig_selectors(hs, chan)= uicontrol('Style', 'popupmenu', 'String', {'PC Trigger', 'External Trigger'}, 'Units', 'normalized', 'Parent',... 
                             parent, 'Position', [.3 .90 - (chan - 1) * (1/13) .2 1/13], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'UserData', struct('hs', hs, 'chan', chan),...
-                            'Callback', @this.TrigSelectorCB);
-                uicontrol('Style', 'togglebutton', 'String', 'Continuous Stream', 'Units', 'normalized', 'Parent', parent, 'UserData', struct('hs', hs, 'chan', chan),... 
-                            'Position', [.5 .90 - (chan - 1) * (1/13) .25 1/13], 'Background', 'y', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.ContinuousButtonCB);
-                uicontrol('Style', 'pushbutton', 'String', ['Trigger Channel  ', num2str(chan)], 'Units', 'normalized', 'Callback', @this.TriggerCallback, 'Parent',... 
-                            parent, 'Position', [.75 .90 - (chan - 1) * (1/13) .25 1/13], 'UserData', struct('Headstage', hs, 'Channel', chan));
+                            'Callback', @this.TrigSelectorCB,'Enable','off');
+                this.toggle_button(hs, chan) = uicontrol('Style', 'togglebutton', 'String', 'Continuous Stream', 'Units', 'normalized', 'Parent', parent, 'UserData', struct('hs', hs, 'chan', chan),... 
+                            'Position', [.5 .90 - (chan - 1) * (1/13) .25 1/13], 'Background', 'y', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.ContinuousButtonCB,'Enable','off');
+                this.push_button (hs, chan) = uicontrol('Style', 'pushbutton', 'String', ['Trigger Channel  ', num2str(chan)], 'Units', 'normalized', 'Callback', @this.TriggerCallback, 'Parent',... 
+                            parent, 'Position', [.75 .90 - (chan - 1) * (1/13) .25 1/13], 'UserData', struct('Headstage', hs, 'Channel', chan), 'Enable','off');
             end
         end
         
@@ -83,23 +105,25 @@ classdef OSCGUI < handle
         function CreateSetup(this)
             setup_panel = uipanel('Title', 'Setup', 'FontSize', 12, 'BackgroundColor', 'white', 'Units', 'normalized',...
                 'Position', [.05 .78 .34 .17]);
-            hbutton = uicontrol('Style','pushbutton','String','Connect','Units', 'normalized', 'Position',[.55 .65 .4 .3],'Callback',@this.ConnectCallback, 'Parent', setup_panel);
+            hbutton = uicontrol('Style','pushbutton','String','Connect & Configure','Units', 'normalized', 'Position',[.55 .65 .4 .3],'Callback',@this.ConnectCallback, 'Parent', setup_panel);
             align(hbutton,'Center','None');
-            config_button = uicontrol('Style','pushbutton','String','Configure','Units', 'normalized', 'Position',[.05 .05 .30 .45],'Callback',@this.ConfigCallback, 'Parent', setup_panel);
-            align(config_button,'Center','None');
-            load_parameter_button = uicontrol('Style','pushbutton','String','Load Parameters from File','Units', 'normalized', 'Position',[.35 .05 .30 .45],...
-                'Callback',@this.LoadParameterCallback, 'Parent', setup_panel);
-            align(load_parameter_button,'Center','None');
-            save_parameter_button = uicontrol('Style','pushbutton','String','Save Parameters To File','Units', 'normalized', 'Position',[.65 .05 .30 .45],...
-                'Callback',@this.SaveParameterCallback, 'Parent', setup_panel);
-            align(save_parameter_button,'Center','None');
+            this.load_parameter_button = uicontrol('Style','pushbutton','String','Load Parameters from File','Units', 'normalized', 'Position',[.15 .05 .25 .45],...
+                'Callback',@this.LoadParameterCallback, 'Parent', setup_panel,'Enable','off');
+            align(this.load_parameter_button,'Center','None');
+            this.save_parameter_button = uicontrol('Style','pushbutton','String','Save Parameters To File','Units', 'normalized', 'Position',[.60 .05 .25 .45],...
+                'Callback',@this.SaveParameterCallback, 'Parent', setup_panel,'Enable','off');
+            align(this.save_parameter_button,'Center','None');
             this.serial_selector = uicontrol('Style', 'popupmenu', 'String', this.os.GetBoardSerials(), 'Units', 'normalized', 'Parent',... 
-                            setup_panel, 'Position', [.05 .65 .4 .2], 'Background', 'white');
+                            setup_panel, 'Position', [.05 .65 .4 .2], 'Background', 'white','Enable','on');
+                 
             uicontrol('Style', 'text', 'String', 'Select your OSC136H Opal Kelly Serial', 'Units', 'normalized', 'Parent',...
                 setup_panel, 'Position', [.05, .90, .4, .1], 'Background' , 'White')
-            
-            reset = uicontrol('Style','pushbutton','String','Reset','Units', 'normalized', 'Position',[.05 .05 .1 .05],'Callback',@this.ResetCallback, 'Background', 'r');
-            align(reset,'Center','None');
+                        
+            this.reset = uicontrol('Style','pushbutton','String','Reset','Units', 'normalized', 'Position',[.05 .05 .1 .05],'Callback',@this.ResetCallback, 'Background', 'r','Enable','off');
+            align(this.reset,'Center','None');
+                        
+            exit = uicontrol('Style','pushbutton','String','Exit','Units', 'normalized', 'Position',[.25 .05 .1 .05],'Callback',@this.ExitCallback, 'Background', 'r','Enable','on');
+            align(exit,'Center','None');             
         end
         
         function ResetCallback(this, source, eventdata)
@@ -107,6 +131,11 @@ classdef OSCGUI < handle
             if ec == 0
                this.UpdateParamDisplay(); 
             end
+        end
+        
+        function ExitCallback(this, source, eventdata)
+            this.f.Visible = 'off';
+            this.delete();
         end
         
         function SaveParameterCallback(this, source, eventdata)
@@ -138,13 +167,7 @@ classdef OSCGUI < handle
                 set(this.WF_period_selectors(wf), 'String', num2str(this.os.Waveforms(wf, 4)));
             end
         end
-         
-        function ConfigCallback(this, source, eventdata)
-           [bitfile, path] = uigetfile('*.bit', 'Select the control bitfile');
-           if ~isequal(bitfile, 0)
-               this.os.Configure(strcat(path, bitfile));
-           end
-        end
+                 
         function CreateWaveformPanels(this)
             for wf = 1:4
                wf_panel = uipanel('Title', strcat("Waveform ", num2str(wf)), 'FontSize', 12, 'BackgroundColor', 'white', 'Units', 'normalized',...
@@ -164,13 +187,13 @@ classdef OSCGUI < handle
                 parent, 'Position', [.6 .25 .2 .2], 'Background', 'white');
             
             this.WF_pulse_selectors(wf) = uicontrol('Style', 'edit', 'String', '0', 'Units', 'normalized', 'Parent',... 
-                parent, 'Position', [.1 .55 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.PulseSelectCB);
+                parent, 'Position', [.1 .55 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.PulseSelectCB,'Enable','off');
             this.WF_amp_selectors(wf) = uicontrol('Style', 'edit', 'String', '0', 'Units', 'normalized', 'Parent',... 
-                parent, 'Position', [.6 .55 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.AmpSelectCB);
+                parent, 'Position', [.6 .55 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.AmpSelectCB,'Enable','off');
             this.WF_pw_selectors(wf) = uicontrol('Style', 'edit', 'String', '0', 'Units', 'normalized', 'Parent',... 
-                parent, 'Position', [.1 .05 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.PWSelectCB);
+                parent, 'Position', [.1 .05 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.PWSelectCB,'Enable','off');
             this.WF_period_selectors(wf) = uicontrol('Style', 'edit', 'String', '0', 'Units', 'normalized', 'Parent',... 
-                parent, 'Position', [.6 .05 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.PeriodSelectCB);
+                parent, 'Position', [.6 .05 .2 .2], 'Background', 'white', 'UserData', struct('wf', wf), 'Callback', @this.PeriodSelectCB,'Enable','off');
         end
         
         function PulseSelectCB(this, source, eventdata)
@@ -244,21 +267,60 @@ classdef OSCGUI < handle
         function TriggerCallback(this, source, eventdata)
             this.os.TriggerChannel(source.UserData.Headstage, source.UserData.Channel)
         end
-            
+        
+        function UpdateEnable(this,my_switch)
+            if(my_switch == "Enable on")
+             set(this.toggle_button,'Enable','on');
+             set(this.push_button,'Enable','on');
+             set(this.Channel_WF_selectors,'Enable','on');
+             set(this.Channel_Trig_selectors,'Enable','on');
+             set(this.WF_pulse_selectors,'Enable','on');
+             set(this.WF_period_selectors,'Enable','on');
+             set(this.WF_amp_selectors,'Enable','on');
+             set(this.WF_pw_selectors,'Enable','on');
+             set(this.load_parameter_button,'Enable','on');
+             set(this.save_parameter_button,'Enable','on');
+             set(this.reset,'Enable','on');
+             set(this.serial_selector,'Enable','off');
+            else
+             set(this.toggle_button,'Enable','off');
+             set(this.push_button,'Enable','off');
+             set(this.Channel_WF_selectors,'Enable','off');
+             set(this.Channel_Trig_selectors,'Enable','off');
+             set(this.WF_pulse_selectors,'Enable','off');
+             set(this.WF_period_selectors,'Enable','off');
+             set(this.WF_amp_selectors,'Enable','off');
+             set(this.WF_pw_selectors,'Enable','off');
+             set(this.load_parameter_button,'Enable','off');
+             set(this.save_parameter_button,'Enable','off');
+             set(this.reset,'Enable','off');
+             set(this.serial_selector,'Enable','on');
+            end
+        end
+        
         function ConnectCallback(this, source, eventdata)
-            if source.String == "Connect"
+            if source.String == "Connect & Configure"
                 contents = get(this.serial_selector, 'String');
                 serial_string = contents(get(this.serial_selector, 'Value'),:);
                 ec = this.os.Connect(serial_string);
                 if ec == 0
-                    set(source, 'String', 'Disconnect');
+                       [bitfile, path] = uigetfile('*.bit', 'Select the control bitfile');
+                       if ~isequal(bitfile, 0)
+                           this.os.Configure(strcat(path, bitfile));
+                           set(source, 'String', 'Disconnect');
+                           this.UpdateEnable('Enable on');
+                       else
+                           this.os.Disconnect();
+                       end
                 end
-            else
-                ec = this.os.Disconnect();
-                if ec == 0
-                    set(source, 'String', 'Connect');
-                end
-            end 
+             else
+                     ec = this.os.Disconnect();
+                        if ec == 0
+                        set(source, 'String', 'Connect & Configure');   
+                        this.UpdateParamDisplay(); 
+                        this.UpdateEnable('Enable off');
+                        end
+             end
         end
         
         

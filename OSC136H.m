@@ -93,7 +93,7 @@ classdef OSC136H < handle
         % Disconnects from the board to prevent connection issues when
         % using multiple instances of the classes. 
         function delete(this)
-           this.Disconnect()
+             this.Disconnect();
         end
         
         % isOpen
@@ -137,6 +137,7 @@ classdef OSC136H < handle
               ec = 0;
               return
            end
+           this.SysReset();
            calllib('okFrontPanel', 'okFrontPanel_Close', this.dev);
            if this.isOpen()
                fprintf('Failed to close board\n')
@@ -153,7 +154,6 @@ classdef OSC136H < handle
         function Configure(this, filename)
            ec = calllib('okFrontPanel', 'okFrontPanel_ConfigureFPGA', this.dev, filename);
            if ec ~= "ok_NoError"
-               ec
                fprintf('Error loading bitfile\n')
                return
            end
@@ -251,7 +251,7 @@ classdef OSC136H < handle
             fd = fopen(filename, 'w');
             fprintf(fd, '%f %f %f\n', this.Channels.');
             fprintf(fd, '%f %f %f %f\n', this.Waveforms.');
-            
+            fclose(fd);
         end
         
         % Gets list of serial numbers for all connected boards
@@ -259,7 +259,7 @@ classdef OSC136H < handle
             serials = 'No connected devices';
             device_count = calllib('okFrontPanel', 'okFrontPanel_GetDeviceCount', this.dev);
             for d = 0:(device_count - 1)
-                sn = calllib('okFrontPanel', 'okFrontPanel_GetDeviceListSerial', this.dev, d, '');
+                sn = calllib('okFrontPanel', 'okFrontPanel_GetDeviceListSerial', this.dev, d, blanks(30));
                 if ~exist('snlist', 'var')
                     snlist = sn;
                 else
