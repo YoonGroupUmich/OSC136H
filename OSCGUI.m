@@ -49,12 +49,17 @@ classdef OSCGUI < handle
             obj.f.Visible = 'on';
             set(obj.f,'CloseRequestFcn',@(h,e)obj.CloseRequestCallback);
             
-            while(obj.os.GetBoardSerials() == "No connected devices")                
-                pause(1);
-                temp = obj.os.GetBoardSerials();
-                if(temp ~= "No connected devices")
-                    set(obj.serial_selector, 'String', temp);
+            try
+                while(1)                
+                    pause(1);
+                    temp = obj.os.GetBoardSerials();
+                    if(temp ~= "No connected devices")
+                        set(obj.serial_selector, 'String', temp);
+                        break;
+                    end
                 end
+            catch
+                fprintf("Detection of Board was aborted by the user.\n");
             end
         end
         
