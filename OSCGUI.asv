@@ -25,6 +25,8 @@ classdef OSCGUI < handle
       save_parameter_button
       reset
       
+      timer
+      
     end
     
     methods
@@ -49,13 +51,12 @@ classdef OSCGUI < handle
             obj.f.Visible = 'on';
             set(obj.f,'CloseRequestFcn',@(h,e)obj.CloseRequestCallback);
             
-            while(obj.os.GetBoardSerials() == "No connected devices")                
-                pause(1);
-                temp = obj.os.GetBoardSerials();
-                if(temp ~= "No connected devices")
-                    set(obj.serial_selector, 'String', temp);
-                end
-            end
+            obj.timer = timer('Name','MyTimer',               ...
+                       'Period',15,                    ... 
+                       'StartDelay',1,                 ... 
+                       'TasksToExecute',inf,           ... 
+                       'ExecutionMode','fixedSpacing', ...
+                       'TimerFcn',{@timerCallback,obj.f1});
         end
         
         function delete(this)
