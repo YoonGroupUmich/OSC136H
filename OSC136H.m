@@ -101,7 +101,7 @@ classdef OSC136H < handle
         function open = isOpen(this)
             open = calllib('okFrontPanel', 'okFrontPanel_IsOpen', this.dev);
         end
-        
+               
         % OutputWireInVal
         % Reads the value at a given WireIn endpoint using FP and outputs
         % the 16-bit wire. Useful for checking whether updates worked
@@ -128,6 +128,18 @@ classdef OSC136H < handle
             calllib('okFrontPanel', 'okFrontPanel_SetWireInValue', this.dev, endpoint, val, mask);
             calllib('okFrontPanel', 'okFrontPanel_UpdateWireIns', this.dev);
         end
+        
+        function ec = UpdatePipeInfo(this, period_pipe, num_pulse_pipe)
+            ec = 0;
+            if(period_pipe > 2^16 || num_pulse_pipe > 2^16)
+               fprintf("Period or number of pulses out of range.\n");
+               ec = -1;
+               return
+            end
+            this.WriteToWireIn(hex2dec('15'), 0, 16, period_pipe);
+            this.WriteToWireIn(hex2dec('16'), 0, 16, num_pulse_pipe);
+        end
+        
         
         % Disconnect
         % Attempts to disconnect a connected OK FPGA.
@@ -271,6 +283,50 @@ classdef OSC136H < handle
             end
         end
         
+        function ec = TriggerPipe(this, headstage, chan, pipe_data)
+            ec = -1;
+            if ~this.isOpen()
+                fprintf('Board not open\n')
+                return
+            end
+            
+            SIZE = numel(pipe_data);
+            if (SIZE <= 1 || SIZE > 32768)
+                errordlg('Error: Invalid pipe data size. Valid size is [2, 32768]. Aborted.', 'Type Error');
+                return
+            end
+            
+            data_out(2 * SIZE, 1) = uint8(0);
+            for i = 1:SIZE
+                if pipe_data(i) > 1023
+                    pipe_data(i) = 1023;
+                end
+                if pipe_data(i) < 0
+                    pipe_data(i) = 0;
+                end
+                data_out(2 * i - 1) = uint8(floor(pipe_data(i) / 256)); 
+                data_out(2 * i) = uint8(mod(pipe_data(i), 256)); 
+            end
+
+            calllib('okFrontPanel', 'okFrontPanel_WriteToPipeIn', this.dev, hex2dec('80'), 2 * SIZE, data_out);
+
+            this.UpdateChannelPipeWf(headstage, chan, 1);
+            persistent buf pv;
+            buf(2 * SIZE, 1) = uint8(0);
+            pv = libpointer('uint8Ptr', buf);
+            calllib('okFrontPanel', 'okFrontPanel_ReadFromPipeOut', this.dev, hex2dec('A0'), 2 * SIZE, pv);
+
+%         epvalue = get(pv, 'Value');
+%         pipe_out_data = zeros(SIZE, 1);
+%         for i = 1:SIZE
+%             pipe_out_data(i) = uint16(epvalue(2 * i - 1))* 256 + uint16(epvalue(2 * i));
+%             fprintf('Read %d \n',   pipe_out_data(i));
+%         end
+            
+            ec = 0;
+             
+        end
+        
         % TriggerChannel
         % Triggers a specific headstage channel.
         function TriggerChannel(this, headstage, chan)
@@ -282,6 +338,9 @@ classdef OSC136H < handle
             if chan_num == -1
                return
             end
+            
+            this.UpdateChannelPipeWf(headstage, chan, 0);
+            
             INITIAL_ENDPOINT = hex2dec('40');
             CHANNELS_PER_TRIG = 16;
             INDEX_OFFSET = 1;
@@ -308,16 +367,17 @@ classdef OSC136H < handle
                 return
             end
             if trig ~= 0 && trig ~= 1
-               fprintf('Valid arguments to trig_select are 1 and 0. Error.\n');
+               fprintf('Valid arguments to trig_select are 0 and 1. Error.\n');
                ec = -1;
                return
             end
-    
+            
             chan_num = this.MapChannel(headstage, chan);
             if chan_num == -1
                ec = -1;
                return
             end
+            
             PARAM_SIZE = 1; % One bit of trig information.
             PARAM_OFFSET = 2; % 2 bits of offset for param location. 
             
@@ -328,6 +388,24 @@ classdef OSC136H < handle
             this.Channels((headstage - 1) * 12 + chan, 2) = trig;
             ec = 0;
         end
+        
+        function tlines = SavePipeFromFile(this, filename)
+            fprintf('Saving pipe data from %s\n', filename)
+            fd = fopen(filename, 'r');
+            if fd == -1
+               fprintf('Error opening pipe data file.\n');
+               return
+            end
+            tline = fgetl(fd);
+            tlines = cell(0,1);
+            while ischar(tline)
+                tlines{end+1,1} = str2num(tline);
+                tline = fgetl(fd);
+            end
+            tlines = cell2mat(tlines);
+            fclose(fd);
+       end
+        
         
         function ec = UpdateChannelPipeWf(this, headstage, chan, pipe_wf)
             if ~this.isOpen()
@@ -364,8 +442,8 @@ classdef OSC136H < handle
                 ec = -1;
                 return
             end
-            if wf <= 0 || wf > 4
-               fprintf('Valid fpga_wf in range [1, 4]. Error.\n');
+            if wf <= 0 || wf > 5
+               fprintf('Valid fpga_wf in range [1, 5]. Error.\n');
                ec = 1;
                return
             end
@@ -375,6 +453,14 @@ classdef OSC136H < handle
                ec = -1;
                return
             end
+            
+            this.Channels((headstage - 1) * 12 + chan, 1) = 0;
+            if(wf == 5)
+                this.Channels((headstage - 1) * 12 + chan, 1) = 1;
+                return
+            end
+            
+            
             PARAM_SIZE = 2; % Two bits of waveform selector.
             PARAM_OFFSET = 0; % 0 bits of offset for param location.
             WF_IDX_OFFSET = 1;
@@ -575,6 +661,9 @@ classdef OSC136H < handle
             for wf = 1:4
                 this.UpdateWaveformParams(wf, 0, 0, 0, 0);
             end
+            
+            this.WriteToWireIn(hex2dec('15'), 0, 16, 0);
+            this.WriteToWireIn(hex2dec('16'), 0, 16, 0);
         end
         
         % Toggle continuous streaming for an individual channel.
@@ -588,6 +677,9 @@ classdef OSC136H < handle
             if chan_num == -1
                 return
             end
+            
+            this.UpdateChannelPipeWf(headstage, chan, 0);
+            
             offset = floor((chan_num - 1) / 16);
             endpoint = hex2dec('12') + offset;
             in_wire_offset = mod((chan_num -1), 16);

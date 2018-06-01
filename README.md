@@ -148,4 +148,4 @@ Toggles continuous waveform output on the `chan` channel on the `headstage` head
 Outputs all board parameters in readable text format.
 
 ## OSC136H GUI
-A visual interface for the above library is provided in the file 'OSCGUI.m'. The GUI can be built by clicking run in the matlab editor while viewing the file, or by typing `GUI = OSCGUI()` at the command prompt. Note that the GUI will not detect the OSC136H system unless the system is connected when the GUI is opened.
+A visual interface for the above library is provided in the file 'OSCGUI.m'. The GUI can be built by clicking run in the matlab editor while viewing the file, or by typing `GUI = OSCGUI()` at the command prompt. 
