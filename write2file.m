@@ -9,7 +9,7 @@ function write2file
     fid = fopen('custom_waveform.pipe','wt');
     
     % To do
-    SIZE = 32768;
+    SIZE = 300;
     temp(SIZE, 1) = 0;
     for i = 1 : SIZE
         temp(i) = mod(i, 300);
