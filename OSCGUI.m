@@ -76,9 +76,9 @@ classdef OSCGUI < handle
                 this.WF_amp_selectors = zeros(4, 1);
                 this.WF_pw_selectors = zeros(4, 1);
                 this.num_pipe_pulse = 1;
-                this.pipe_data = 0;
+                this.pipe_data = [0;0];
                 this.temp_num_pipe_pulse = 1;
-                this.temp_pipe_data = 0;
+                this.temp_pipe_data = {0;0};
                 this.connected = 0;
                 this.connected_serial_name = 'No connected devices'; 
                 this.CreateSetup();
@@ -116,27 +116,48 @@ classdef OSCGUI < handle
        end
        
         function CreateHeadstagePanels(this)
-           for hs = 1:3
-              hs_panel = uipanel('Title', strcat("Headstage ", num2str(hs)), 'FontUnits', 'normalized', 'FontSize', (1/14), 'BackgroundColor', 'white', 'Units', 'normalized',...
-                  'Position', [.4 .7 - (.05 + ((hs - 1) * .3)) .55 .3], 'Parent', this.f);
-              this.PopulateHeadstagePanel(hs_panel, hs);
-           end
+              tabgp = uitabgroup(this.f, 'Position', [.4 .15 .55 .80]);
+              tab1 = uitab(tabgp,'Title', "Headstage 1");
+              tab2 = uitab(tabgp,'Title', "Headstage 2");
+              tab3 = uitab(tabgp,'Title', "Headstage 3");
+              
+              this.PopulateHeadstagePanel(tab1, 1);
+              this.PopulateHeadstagePanel(tab2, 2);
+              this.PopulateHeadstagePanel(tab3, 3);
         end
      
         function PopulateHeadstagePanel(this, parent, hs)
             for chan = 1:12
-                uicontrol('Style', 'text', 'String', strcat('Shank ', num2str(ceil(chan / 3)), ' LED ', num2str(mod(chan - 1, 3) + 1)), 'Units', 'normalized', 'Parent',... 
-                            parent, 'Position', [.0 .90 - (chan - 1) * (1/13) .1 1/13], 'Background', 'white');
+                LED(chan) = uicontrol('Style', 'text', 'FontSize', 9, 'String', strcat(' LED ', num2str(mod(chan - 1, 3) + 1)), 'Units', 'normalized', 'Parent',... 
+                            parent, 'Position', [.039 .90 - (chan - 1) * (1/13) .06 1/28]);                        
                 this.Channel_WF_selectors(hs, chan) = uicontrol('Style', 'popupmenu', 'String', {'Waveform 1', 'Waveform 2', 'Waveform 3', 'Waveform 4','Custom waveform'}, 'Units', 'normalized', 'Parent',... 
-                            parent, 'Position', [.1 .90 - (chan - 1) * (1/13) .2 1/13], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.WFSelectorCB,'Enable','off');
+                            parent, 'FontSize', 9, 'Position', [.1 .90 - (chan - 1) * (1/13) .2 1/28], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.WFSelectorCB,'Enable','off');
                 this.Channel_Trig_selectors(hs, chan)= uicontrol('Style', 'popupmenu', 'String', {'PC Trigger', 'External Trigger'}, 'Units', 'normalized', 'Parent',... 
-                            parent, 'Position', [.3 .90 - (chan - 1) * (1/13) .2 1/13], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'UserData', struct('hs', hs, 'chan', chan),...
+                            parent, 'FontSize', 9, 'Position', [.3 .90 - (chan - 1) * (1/13) .2 1/28], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'UserData', struct('hs', hs, 'chan', chan),...
                             'Callback', @this.TrigSelectorCB,'Enable','off');
                 this.toggle_button(hs, chan) = uicontrol('Style', 'togglebutton', 'String', 'Continuous Stream', 'Units', 'normalized', 'Parent', parent, 'UserData', struct('hs', hs, 'chan', chan),... 
-                            'Position', [.5 .90 - (chan - 1) * (1/13) .25 1/13], 'Background', 'y', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.ContinuousButtonCB,'Enable','off');
+                            'Position', [.5 .901 - (chan - 1) * (1/13) .25 1/28], 'Background', 'y', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.ContinuousButtonCB,'Enable','off');
                 this.push_button (hs, chan) = uicontrol('Style', 'pushbutton', 'String', ['Trigger Channel  ', num2str(chan)], 'Units', 'normalized', 'Callback', @this.TriggerCallback, 'Parent',... 
-                            parent, 'Position', [.75 .90 - (chan - 1) * (1/13) .25 1/13], 'UserData', struct('Headstage', hs, 'Channel', chan), 'Enable','off');
+                            parent, 'Position', [.75 .9002 - (chan - 1) * (1/13) .25 1/27.5], 'UserData', struct('Headstage', hs, 'Channel', chan), 'Enable','off');
+                                    
+                if mod(chan, 3) == 1
+                    set(LED(chan),'Background','blue');
+                else
+                    if mod(chan, 3) == 2
+                        set(LED(chan),'Background','white');
+                    else
+                        set(LED(chan),'Background','red');
+                    end
+                end
             end
+            
+            for shank = 1:4
+                subpanel(shank) = uipanel(this.f,'Position',[.402 0.899 - 0.1765 * shank .02 .148]);
+                ax(shank) = axes('Parent',subpanel(shank),'Position',[0 0 0.45 0.28],'Visible','off');
+                uistack(subpanel(shank),'top');                
+                text(1,1,strcat(' Shank ', num2str(shank)),'Parent',ax(shank),'Rotation',90);
+            end
+           
         end
         
         function WFSelectorCB(this, source, eventdata)
@@ -157,7 +178,7 @@ classdef OSCGUI < handle
                   this.os.UpdatePipeInfo(numel(this.pipe_data), 65535);
                   this.os.TriggerPipe(source.UserData.hs, source.UserData.chan, this.pipe_data);
                else
-               this.os.ToggleContinuous(source.UserData.hs, source.UserData.chan, 1);
+                  this.os.ToggleContinuous(source.UserData.hs, source.UserData.chan, 1);
                end
                set(source, 'Background', 'g');
             else
@@ -235,7 +256,7 @@ classdef OSCGUI < handle
         end
         
         function LoadPipeCallback(this, source, eventdata)
-          [txtfile, path] = uigetfile('*.pipe', 'Select the pipe data .txt file');
+          [txtfile, path] = uigetfile('*.cwave', 'Select the .cwave file');
            if ~isequal(txtfile, 0)
                try
                this.temp_pipe_data = this.os.SavePipeFromFile(strcat(path, txtfile));
@@ -248,12 +269,12 @@ classdef OSCGUI < handle
         function SavePipeCallback(this, source, eventdata)
             try
             SIZE = numel(this.temp_pipe_data);
-                if (SIZE <= 0 || SIZE > 32768)
-                    errordlg('Error: Invalid pipe data size. Valid size is [1, 32768]. No changes will be applied.', 'Type Error');
+                if (SIZE <= 1 || SIZE > 32768)
+                    errordlg('Error: Invalid pipe data size. Valid size is [2, 32768]. No changes will be applied.', 'Type Error');
                     return
                 end
             catch
-                errordlg('Error: Invalid pipe data size. Valid size is [1, 32768]. No changes will be applied.', 'Type Error');
+                errordlg('Error: Invalid pipe data size. Valid size is [2, 32768]. No changes will be applied.', 'Type Error');
             end
             this.num_pipe_pulse = this.temp_num_pipe_pulse;
             this.pipe_data = this.temp_pipe_data;
@@ -279,8 +300,8 @@ classdef OSCGUI < handle
             end
             figure('Name','Preview of Pipe Waveform','numbertitle', 'off')
             plot(x,y);
-            xlabel('Time (ms)') % x-axis label
-            ylabel('Amplitude (\muA)') % y-axis label
+            xlabel('Time (µs)') % x-axis label
+            ylabel('Amplitude (µA)') % y-axis label
             if(this.temp_num_pipe_pulse > 0)
                 title(strcat({'The following pattern will repeat  '},num2str(this.temp_num_pipe_pulse),{'  times.'}));
             else
@@ -294,9 +315,9 @@ classdef OSCGUI < handle
                 'Position', [.05 .54 .44 .41], 'Parent', this.pipe_f);  
 
             intro_string = {'Custom waveform will assign a series of pre-defined amplitudes on each of the sampling time when it is triggered.',' ',...
-                'The minimum step size in time is ~0.09 ms (11kHz)','The maximum period of waveform is 32768 samples, i.e. ~2.98 s',' '...
+                'The minimum step size in time is ~90 µs (11kHz)','The maximum period of waveform is 32768 samples, i.e. ~2.98 s',' '...
                 'To define the custom waveform:','Step 1: Type in the number of pulses', ...
-                'Step 2: Input a .pipe file, which contains one number to represent the amplitude [0 - 1023] for each sampling. The number of lines in .pipe will reflect the full period of the custom waveform. The .pipe file can be generated by write2file.m',...
+                'Step 2: Input a .cwave file, which contains one number to represent the amplitude [0 - 1023] for each sampling. The number of lines in .cwave will reflect the full period of the custom waveform. The .cwave file can be generated by write2file.m',...
                 'Step 3: (Optional) Preview the waveform','Step 4: Save the data and Exit', 'Step 5: Select custom waveform mode and trigger on a certain channel',' ','Click Cancel to exit without saving'};
 
             uicontrol('Style', 'text', 'FontSize', 10, 'String', intro_string, 'Units', 'normalized', 'Parent',... 
@@ -328,7 +349,7 @@ classdef OSCGUI < handle
                 'Parent', this.pipe_f,'Background', 'r');
             align(cancel_button,'Center','None');
             
-            ax1=axes('units','normalized','Parent',this.pipe_f,'position',[0.045 0.078 0.445 0.445]);          
+            ax1 = axes('units','normalized','Parent',this.pipe_f,'position',[0.045 0.078 0.447 0.447],'Visible','off');          
             myImage = imread('cus_waveform_inst.jpg');
             axes(ax1);
             imshow(myImage);
