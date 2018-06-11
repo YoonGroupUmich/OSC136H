@@ -136,17 +136,18 @@ classdef OSCGUI < handle
                             parent, 'FontSize', 9, 'Position', [.3 .90 - (chan - 1) * (1/13) .2 1/28], 'Background', 'white', 'UserData', struct('hs', hs, 'chan', chan), 'UserData', struct('hs', hs, 'chan', chan),...
                             'Callback', @this.TrigSelectorCB,'Enable','off');
                 this.toggle_button(hs, chan) = uicontrol('Style', 'togglebutton', 'String', 'Continuous Stream', 'Units', 'normalized', 'Parent', parent, 'UserData', struct('hs', hs, 'chan', chan),... 
-                            'Position', [.5 .901 - (chan - 1) * (1/13) .25 1/28], 'Background', 'y', 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.ContinuousButtonCB,'Enable','off');
+                            'Position', [.5 .901 - (chan - 1) * (1/13) .25 1/28], 'Backgroundcolor',[.5 .5 .5], 'UserData', struct('hs', hs, 'chan', chan), 'Callback', @this.ContinuousButtonCB,'Enable','off');
+                
                 this.push_button (hs, chan) = uicontrol('Style', 'pushbutton', 'String', ['Trigger Channel  ', num2str(chan)], 'Units', 'normalized', 'Callback', @this.TriggerCallback, 'Parent',... 
                             parent, 'Position', [.75 .9002 - (chan - 1) * (1/13) .25 1/27.5], 'UserData', struct('Headstage', hs, 'Channel', chan), 'Enable','off');
                                     
                 if mod(chan, 3) == 1
-                    set(LED(chan),'Background','blue');
+                    set(LED(chan),'Backgroundcolor',[135/255 206/255 250/255]);
                 else
                     if mod(chan, 3) == 2
-                        set(LED(chan),'Background','white');
+                    set(LED(chan),'Backgroundcolor',[100/255 149/255 237/255]);
                     else
-                        set(LED(chan),'Background','red');
+                        set(LED(chan),'Backgroundcolor',[70/255 130/255 180/255]);
                     end
                 end
             end
@@ -187,7 +188,7 @@ classdef OSCGUI < handle
                else
                   this.os.ToggleContinuous(source.UserData.hs, source.UserData.chan, 0);
                end
-               set(source, 'Background', 'y');
+               set(source, 'Backgroundcolor',[.5 .5 .5]);
             end
             this.ThrowException();
         end
@@ -215,11 +216,11 @@ classdef OSCGUI < handle
                 setup_panel, 'Position', [.05, .90, .4, .1], 'Background' , 'White')
                         
             this.reset = uicontrol('Style','pushbutton','String','Reset','Units', 'normalized', 'Position',[.05 .05 .1 .05],'Callback',@this.ResetCallback,...
-                'Parent', this.f,'Background', 'r','Enable','off');
+                'Parent', this.f, 'Enable','off');
             align(this.reset,'Center','None');
                         
             exit = uicontrol('Style','pushbutton','String','Exit','Units', 'normalized', 'Position',[.25 .05 .1 .05],'Callback',@this.ExitCallback,...
-                'Parent', this.f, 'Background', 'r','Enable','on');
+                'Parent', this.f, 'Enable','on');
             align(exit,'Center','None');             
         end
         
@@ -302,10 +303,8 @@ classdef OSCGUI < handle
             plot(x,y);
             xlabel('Time (µs)') % x-axis label
             ylabel('Amplitude (µA)') % y-axis label
-            if(this.temp_num_pipe_pulse > 0)
-                title(strcat({'The following pattern will repeat  '},num2str(this.temp_num_pipe_pulse),{'  times.'}));
-            else
-                title('The following pattern will be continuous.');  
+            if(this.temp_num_pipe_pulse >= 0)
+                title(strcat({'The following pattern will repeat  '},num2str(this.temp_num_pipe_pulse),{'  times.'}));  
             end
             axis([0 (data_size - 0.01)*0.0909 -1 max(max(this.temp_pipe_data))+1 ]);
         end
