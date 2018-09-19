@@ -149,3 +149,21 @@ Outputs all board parameters in readable text format.
 
 ## OSC136H GUI
 A visual interface for the above library is provided in the file 'OSCGUI.m'. The GUI can be built by clicking run in the matlab editor while viewing the file, or by typing `GUI = OSCGUI()` at the command prompt. 
+
+## FAQ
+Q: I am a new user and cannot run the GUI in Matlab. Is there anything wrong? 
+A: For new users who need to adapt the OSC136H GUI to their PC, several action is needed. 
+All needed files are in the latest release:
+https://github.com/YoonGroupUmich/OSC136H/releases. 
+The latest version has a green tag "Latest release" on the left of its headline. 
+Step 1: Install Opal Kelly Frontpanel on your PC. You should find the first file in the release named FrontPanelUSB-Win-x64-4.5.6.exe (44MB).  Install this on your PC (It is provided by Opal Kelly). 
+Step 2: Install Matlab on https://www.mathworks.com/products/new_products/latest_features.html. If you are operating on Matlab version 2015b or newer, you can ignore this step. 
+Step 3: Install Mingw64 gcc complier from Matlab Add-on stores. Matlab store will direct you through the installation of the complier.
+
+Q: The OSC136H GUI window freezes when I try to run the script OSC136GUI.m. Can I fix it?
+A: Yes. The first thing you should do is to check the PC environment. If you can open up the OSCGUI window with no Opal Kelly board plugged in, that would indicate your PC environment is fine. Otherwise, re-check if any step is missing in building up the environment. 
+If then, you only experience crashing when there is Opal Kelly board plugged in, we provide a stand alone executable which has the same function as OSC136HGUI.m. Download .zip file named OSC136H.exe_package.zip in the latest release. Run OSCGUI.exe instead of Matlab script.
+
+Q: Do I still need Matlab if I am going to use OSCGUI.exe only?
+A: Yes. You have to have Mingw64 properly installed on your PC, in which case getting a Matlab will help you ease the procedure. You would also need to install Opal Kelly Frontpanel. The Matlab script language is also friendly for all the users to make their own changes. 
+
