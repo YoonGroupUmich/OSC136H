@@ -81,8 +81,8 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef unsigned long okPLL22150_HANDLE;
-typedef unsigned long okPLL22393_HANDLE;
+typedef void* okPLL22150_HANDLE;
+typedef void* okPLL22393_HANDLE;
 typedef struct okDeviceSensorsHandle* okDeviceSensors_HANDLE;
 typedef struct okDeviceSettingsHandle* okDeviceSettings_HANDLE;
 typedef struct okFirmwareHandle* okFirmware_HANDLE;

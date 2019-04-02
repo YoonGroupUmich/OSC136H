@@ -22,6 +22,7 @@ classdef OSC136H < handle
         
         % OKFP Dev object for using the Opal Kelly FP Library
         dev
+        pll
         
     end
     
@@ -86,6 +87,18 @@ classdef OSC136H < handle
             obj.Channels = zeros(36, 3); 
             obj.Waveforms = zeros(4, 4);
             obj.dev = calllib('okFrontPanel', 'okFrontPanel_Construct');
+
+            obj.pll = calllib('okFrontPanel', 'okPLL22150_Construct');
+            calllib('okFrontPanel', 'okPLL22150_SetReference', obj.pll, 48.0, 0);
+            calllib('okFrontPanel', 'okPLL22150_SetVCOParameters', obj.pll, 512, 125);
+            calllib('okFrontPanel', 'okPLL22150_SetDiv1', obj.pll, 'ok_DivSrc_VCO', 15);
+            calllib('okFrontPanel', 'okPLL22150_SetDiv2', obj.pll, 'ok_DivSrc_VCO', 8);
+            calllib('okFrontPanel', 'okPLL22150_SetOutputSource', obj.pll, 0, 'ok_ClkSrc22150_Div1ByN');
+            calllib('okFrontPanel', 'okPLL22150_SetOutputEnable', obj.pll, 0, 1);
+            calllib('okFrontPanel', 'okPLL22150_SetOutputSource', obj.pll, 1, 'ok_ClkSrc22150_Div2ByN');
+            calllib('okFrontPanel', 'okPLL22150_SetOutputEnable', obj.pll, 1, 1);
+
+
             fprintf('Successfully loaded okFrontPanel.\n');
         end
         
@@ -170,21 +183,7 @@ classdef OSC136H < handle
                return
            end
            fprintf("Succesfully loaded bitfile\n");
-           
-           pll = calllib('okFrontPanel', 'okPLL22150_Construct');
-           calllib('okFrontPanel', 'okPLL22150_SetReference', pll, 48.0, 0);
-           calllib('okFrontPanel', 'okPLL22150_SetVCOParameters', pll, 512, 125);
-           
-           calllib('okFrontPanel', 'okPLL22150_SetDiv1', pll, 'ok_DivSrc_VCO', 15);
-           calllib('okFrontPanel', 'okPLL22150_SetDiv2', pll, 'ok_DivSrc_VCO', 8);
-           
-           calllib('okFrontPanel', 'okPLL22150_SetOutputSource', pll, 0, 'ok_ClkSrc22150_Div1ByN');
-           calllib('okFrontPanel', 'okPLL22150_SetOutputEnable', pll, 0, 1);
-           
-           calllib('okFrontPanel', 'okPLL22150_SetOutputSource', pll, 1, 'ok_ClkSrc22150_Div2ByN');
-           calllib('okFrontPanel', 'okPLL22150_SetOutputEnable', pll, 1, 1);
-           
-           calllib('okFrontPanel', 'okFrontPanel_SetPLL22150Configuration', this.dev, pll);
+           calllib('okFrontPanel', 'okFrontPanel_SetPLL22150Configuration', this.dev, this.pll);
         end
         
         % Connect
